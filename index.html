@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard การชำระค่าธรรมเนียม | กรมธุรกิจพลังงาน</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="page-bg"></div>
+<main class="container">
+
+  <header class="hero">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <span>⚡</span>
+      </div>
+      <div>
+        <div class="eyebrow">MINISTRY OF ENERGY • DEPARTMENT OF ENERGY BUSINESS</div>
+        <h1>Dashboard การชำระค่าธรรมเนียม</h1>
+        <p>ระบบวิเคราะห์และติดตามข้อมูลการชำระค่าธรรมเนียม</p>
+        <div class="department">กรมธุรกิจพลังงาน • กระทรวงพลังงาน</div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button id="reset" class="reset-btn">↻ ล้างตัวกรอง</button>
+    </div>
+  </header>
+
+  <section class="upload-box">
+    <div class="upload-icon">↥</div>
+    <div class="upload-info">
+      <strong>นำเข้าข้อมูลจาก Excel</strong>
+      <p>รองรับไฟล์ <b>.xlsx</b> และ <b>.xls</b> เลือกไฟล์แล้ว Dashboard จะประมวลผลและอัปเดตอัตโนมัติ</p>
+    </div>
+    <label class="upload-btn">
+      เลือกไฟล์ Excel
+      <input id="excelFile" type="file" accept=".xlsx,.xls" hidden>
+    </label>
+    <button id="downloadFiltered" class="download-btn" type="button">
+      ↓ ดาวน์โหลดข้อมูลที่เลือก
+    </button>
+    <span id="fileName">ใช้ข้อมูลเริ่มต้นจากระบบ</span>
+  </section>
+
+  <section class="section-title">
+    <div>
+      <span class="section-kicker">DATA FILTER</span>
+      <h2>ตัวกรองข้อมูล</h2>
+    </div>
+    <span class="hint">เลือกข้อมูลที่ต้องการวิเคราะห์</span>
+  </section>
+
+  <section class="filters">
+    <label>ปีงบประมาณ<select id="year"><option value="">ทั้งหมด</option></select></label>
+    <label>เดือน<select id="month"><option value="">ทั้งหมด</option></select></label>
+    <label>กฎหมาย<select id="law"><option value="">ทั้งหมด</option></select></label>
+    <label>ช่องทางชำระ<select id="channel"><option value="">ทั้งหมด</option></select></label>
+  </section>
+
+  <section class="section-title">
+    <div>
+      <span class="section-kicker">OVERVIEW</span>
+      <h2>ภาพรวมข้อมูล</h2>
+    </div>
+  </section>
+
+  <section class="cards">
+    <div class="metric-card accent-blue">
+      <span class="metric-label">ผู้ชำระทั้งหมด</span>
+      <b id="people">0</b>
+      <small>ราย</small>
+    </div>
+    <div class="metric-card accent-gold">
+      <span class="metric-label">ยอดเงินรวม</span>
+      <b id="money">0</b>
+      <small>บาท</small>
+    </div>
+    <div class="metric-card accent-green">
+      <span class="metric-label">เดือนที่มีข้อมูล</span>
+      <b id="months">0</b>
+      <small>เดือน</small>
+    </div>
+    <div class="metric-card accent-purple">
+      <span class="metric-label">กฎหมาย</span>
+      <b id="laws">0</b>
+      <small>ประเภท</small>
+    </div>
+  </section>
+
+  <section class="insights">
+    <div><span>เดือนสูงสุด</span><b id="maxMonth">-</b><small id="maxMonthVal">0 ราย</small></div>
+    <div><span>เดือนต่ำสุด</span><b id="minMonth">-</b><small id="minMonthVal">0 ราย</small></div>
+    <div><span>ช่องทางสูงสุด</span><b id="maxChannel">-</b><small id="maxChannelVal">0 ราย</small></div>
+    <div><span>ช่องทางต่ำสุด</span><b id="minChannel">-</b><small id="minChannelVal">0 ราย</small></div>
+  </section>
+
+  <section class="section-title chart-title">
+    <div>
+      <span class="section-kicker">ANALYTICS</span>
+      <h2>การวิเคราะห์ข้อมูล</h2>
+    </div>
+    <span class="hint">คลิกเลือกหน้ากราฟที่ต้องการดู</span>
+  </section>
+
+  <nav class="chart-nav" aria-label="เลือกหน้ากราฟ">
+    <button class="chart-tab active" data-page="trendPage">📈 แนวโน้มรายเดือน</button>
+    <button class="chart-tab" data-page="forecastPage">🔮 พยากรณ์</button>
+    <button class="chart-tab" data-page="yearPage">📊 เปรียบเทียบปี</button>
+    <button class="chart-tab" data-page="channelPage">💳 ช่องทางชำระ</button>
+    <button class="chart-tab" data-page="monthlyPage">📅 จำนวนรายเดือน</button>
+    <button class="chart-tab" data-page="moneyPage">💰 ยอดเงิน</button>
+    <button class="chart-tab" data-page="moneyTrendPage">📉 แนวโน้มยอดเงิน</button>
+    <button class="chart-tab" data-page="tablePage">📋 ตารางข้อมูล</button>
+  </nav>
+
+  <section id="trendPage" class="chart-page active">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>แนวโน้ม</span><h3>กราฟแนวโน้มรายเดือน</h3></div><em>LINE</em></div>
+      <div class="chart-area"><canvas id="trend"></canvas></div>
+    </article>
+  </section>
+
+  <section id="forecastPage" class="chart-page">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>FORECAST</span><h3>กราฟพยากรณ์แนวโน้ม</h3></div><em>FORECAST</em></div>
+      <div class="chart-area"><canvas id="forecast"></canvas></div>
+      <p class="forecast-note">พยากรณ์เบื้องต้นจากแนวโน้มข้อมูลจำนวนผู้ชำระที่ผ่านตัวกรอง โดยใช้ Linear Regression ไม่ใช่ค่าคาดการณ์ทางสถิติอย่างเป็นทางการ</p>
+    </article>
+  </section>
+
+  <section id="yearPage" class="chart-page">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>เปรียบเทียบ</span><h3>เปรียบเทียบปีงบประมาณ</h3></div><em>YEAR</em></div>
+      <div class="chart-area"><canvas id="yearCompare"></canvas></div>
+    </article>
+  </section>
+
+  <section id="channelPage" class="chart-page">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>สัดส่วน</span><h3>สัดส่วนช่องทางการชำระ</h3></div><em>DONUT</em></div>
+      <div class="chart-area"><canvas id="pie"></canvas></div>
+    </article>
+    <article class="chart-card full-page-chart second-chart">
+      <div class="chart-head"><div><span>จำนวน</span><h3>จำนวนผู้ชำระตามช่องทาง</h3></div><em>BAR</em></div>
+      <div class="chart-area"><canvas id="channelBar"></canvas></div>
+    </article>
+  </section>
+
+  <section id="monthlyPage" class="chart-page">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>จำนวน</span><h3>จำนวนผู้ชำระรายเดือน</h3></div><em>BAR</em></div>
+      <div class="chart-area"><canvas id="monthlyBar"></canvas></div>
+    </article>
+  </section>
+
+  <section id="moneyPage" class="chart-page">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>ยอดเงิน</span><h3>ยอดเงินตามช่องทาง</h3></div><em>BAHT</em></div>
+      <div class="chart-area"><canvas id="moneyBar"></canvas></div>
+    </article>
+  </section>
+
+  <section id="moneyTrendPage" class="chart-page">
+    <article class="chart-card full-page-chart">
+      <div class="chart-head"><div><span>แนวโน้มยอดเงิน</span><h3>ยอดเงินรวมรายเดือน</h3></div><em>BAHT TREND</em></div>
+      <div class="chart-area"><canvas id="moneyTrend"></canvas></div>
+    </article>
+  </section>
+
+  <section id="tablePage" class="chart-page">
+    <article class="table-card">
+      <div class="table-head">
+        <div><span class="section-kicker">DATA TABLE</span><h2>รายละเอียดข้อมูล</h2></div>
+        <span>ข้อมูลที่ผ่านการกรอง</span>
+      </div>
+      <div class="scroll"><table id="table"></table></div>
+    </article>
+  </section>
+
+  <footer>
+    <span>Dashboard การชำระค่าธรรมเนียม</span>
+    <span>กรมธุรกิจพลังงาน • กระทรวงพลังงาน</span>
+  </footer>
+</main>
+<script src="script.js?v=20260917-2"></script>
+</body>
+</html>
